@@ -5,6 +5,15 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  async rewrites() {
+    return [
+      {
+        source: "/users/",
+        destination: "/users", // treat both the same without redirect
+      },
+    ];
+  },
+};
 
 export default config;
