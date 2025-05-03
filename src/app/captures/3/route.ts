@@ -6,9 +6,7 @@ import { eq, and } from "drizzle-orm";
 import { db } from "~/server/db";
 import { cards } from "~/server/db/schema";
 import {
-  getCardXp,
-  getCloudiness,
-  getCoverage,
+  getCardStats,
   getTier,
   getTotalXp,
   getUserDataById,
@@ -147,14 +145,16 @@ export async function POST(req: Request) {
       })
       .where(eq(userData.userId, user.id))
       .execute();
+    const { cloudiness, coverage, glow, xp } = getCardStats(allCaptures);
     const response = {
       card: {
         id: card[0].id,
         modelId: card[0].aircraftId,
         aircraftId: card[0].aircraftId,
-        coverage: getCoverage(allCaptures),
-        cloudiness: getCloudiness(allCaptures),
-        xp: getCardXp(allCaptures),
+        coverage,
+        cloudiness,
+        xp,
+        glow,
         tier: getTier(allCaptures),
         glowCount: allCaptures.filter((c) => c.glow).length,
       },

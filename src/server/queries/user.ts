@@ -13,7 +13,7 @@ import {
 } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 import {
-  ItemType,
+  type ItemType,
   Tier,
   type Capture,
   type Card,
