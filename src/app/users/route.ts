@@ -8,68 +8,103 @@ import {
   getCapturedRegs,
   getTotalXp,
 } from "~/server/queries/user";
+import type { UserData } from "~/types/user";
 
-export async function POST(req: Request) {
-  const jsonBody = (await req.json()) as { email: string; password: string };
-  const hashed = await hashPassword(jsonBody.password);
-  const user = await db
-    .select()
-    .from(users)
-    .where(
-      and(eq(users.email, jsonBody.email), eq(users.hashedPassword, hashed)),
-    )
-    .execute();
-  if (!user[0]) {
-    return NextResponse.json(
-      { error: "Invalid username or password" },
-      { status: 401 },
-    );
-  }
-  const currentUserData = await getUserDataById(user[0].id);
-  if (!currentUserData) {
-    return NextResponse.json(
-      { error: "Invalid username or password" },
-      {
-        status: 401,
-      },
-    );
-  }
-  console.log("CARDS", currentUserData.cards.length);
-  const response = {
-    token: user[0].token,
+// Common response formatter for both POST and GET routes
+function formatUserResponse(
+  currentUserData: UserData,
+  user: {
+    token: string;
+    hashedPassword: string;
+    email: string;
+    id: string;
+  },
+  capturedRegs: string[],
+) {
+  return {
+    token: user.token,
     userData: {
       ...currentUserData,
-      xp: await getTotalXp(currentUserData),
+      xp: currentUserData.xp,
       cards: currentUserData.cards.map((c) => ({
         ...c,
-        captures: c.captures.map((cptr) => ({
-          ...cptr,
-        })),
+        captures: c.captures.map((cptr) => ({ ...cptr })),
         glowCount: c.glow ? 1 : 0,
       })),
       numAircraftModels: currentUserData.cards.length,
       unlockedModelIds: currentUserData.cards.map((c) => c.aircraftId),
-      items: currentUserData.items.map((i) => {
-        return { id: i.id, type: i.type };
-      }),
+      items: currentUserData.items.map((i) => ({
+        id: i.id,
+        type: i.type,
+      })),
     },
     relocation: { airportId: 0, airport: 0, timestamp: 0 },
-    capturedRegs: await getCapturedRegs(currentUserData),
+    capturedRegs,
     missions: [],
   };
+}
 
-  console.log(response);
-  return NextResponse.json(response, { status: 201 });
+// Handles user authentication and returns appropriate error response
+async function authenticateUser(email: string, hashedPassword: string) {
+  const user = await db
+    .select()
+    .from(users)
+    .where(
+      and(eq(users.email, email), eq(users.hashedPassword, hashedPassword)),
+    )
+    .execute();
+
+  if (!user[0]) {
+    return { error: "Invalid username or password", status: 401 };
+  }
+
+  const currentUserData = await getUserDataById(user[0].id);
+  if (!currentUserData) {
+    return { error: "Invalid username or password", status: 401 };
+  }
+
+  // Pre-calculate total XP to avoid duplicate calculations
+  const totalXp = await getTotalXp(currentUserData);
+  currentUserData.xp = totalXp;
+
+  // Fetch captured registrations once
+  const capturedRegs = await getCapturedRegs(currentUserData);
+
+  return { user: user[0], currentUserData, capturedRegs, status: 201 };
+}
+
+export async function POST(req: Request) {
+  const jsonBody = (await req.json()) as { email: string; password: string };
+  const hashed = await hashPassword(jsonBody.password);
+
+  const authResult = await authenticateUser(jsonBody.email, hashed);
+
+  if (authResult.error) {
+    return NextResponse.json(
+      { error: authResult.error },
+      { status: authResult.status },
+    );
+  }
+
+  const response = formatUserResponse(
+    authResult.currentUserData!,
+    authResult.user!,
+    authResult.capturedRegs!,
+  );
+
+  return NextResponse.json(response, { status: authResult.status });
 }
 
 export async function PATCH(req: Request) {
   return withAuth(req, async (user) => {
     const jsonBody = (await req.json()) as { messagingToken: string };
-    void (await db
+
+    await db
       .update(userData)
       .set({ messagingToken: jsonBody.messagingToken })
       .where(eq(userData.userId, user.id))
-      .execute());
+      .execute();
+
     return NextResponse.json({
       messagingToken: jsonBody.messagingToken,
       lastFilmHandoutTimeLeft: 0,
@@ -87,36 +122,21 @@ export async function PATCH(req: Request) {
 export async function GET(req: Request) {
   return withAuth(req, async (user) => {
     const currentUserData = await getUserDataById(user.id);
-    console.log("Current user data is ", currentUserData);
+
     if (!currentUserData) {
       return NextResponse.json(
         { error: "Invalid username or password" },
-        {
-          status: 401,
-        },
+        { status: 401 },
       );
     }
-    const response = {
-      token: user.token,
-      userData: {
-        ...currentUserData,
-        xp: await getTotalXp(currentUserData),
-        cards: currentUserData.cards.map((c) => ({
-          ...c,
-          captures: c.captures.map((cptr) => ({
-            ...cptr,
-          })),
-          glowCount: c.glow ? 1 : 0,
 
-          numAircraftModel: currentUserData.cards.length,
-        })),
-      },
-      relocation: { airportId: 0, airport: 0, timestamp: 0 },
-      capturedRegs: await getCapturedRegs(currentUserData),
-      missions: [],
-    };
+    // Pre-calculate values used in response
+    const totalXp = await getTotalXp(currentUserData);
+    currentUserData.xp = totalXp;
+    const capturedRegs = await getCapturedRegs(currentUserData);
 
-    console.log(response);
+    const response = formatUserResponse(currentUserData, user, capturedRegs);
+
     return NextResponse.json(response, { status: 200 });
   });
 }
