@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   const data = await db
     .insert(users)
     .values({
-      token: sign({ email: jsonBody.email }, env.JWT_SECRET as string, {
+      token: sign({ email: jsonBody.email }, env.JWT_SECRET, {
         expiresIn: "1y",
       }),
 
