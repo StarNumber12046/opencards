@@ -16,7 +16,6 @@ import {
 export async function POST(req: Request) {
   return withAuth(req, async (user) => {
     const jsonBody = (await req.json()) as CapturePayload;
-
     console.log(jsonBody);
     const currentUserData = await getUserDataById(user.id);
     if (!currentUserData) {
@@ -197,10 +196,7 @@ export async function POST(req: Request) {
         imageCopy: capture[0].imageCopy,
         glow: capture[0].glow,
       },
-      coins:
-        Number(jsonBody.coverage == 100) +
-        Number(jsonBody.cloudiness == 100) +
-        currentUserData.coins, // currentUserData has not been updated with the new coins so we sum
+      coins: jsonBody.coins + currentUserData.coins, // currentUserData has not been updated with the new coins so we sum
       userXp: await getTotalXp(currentUserData),
       achievements: [
         { id: "RARE100", progressNumerator: 8, isAchieved: false },
@@ -244,7 +240,6 @@ export async function POST(req: Request) {
           unfinished: 3,
         },
       ],
-      levelAward: {},
     };
     console.log(JSON.stringify(response));
     return NextResponse.json(response, { status: 201 });

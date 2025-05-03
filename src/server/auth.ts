@@ -5,14 +5,14 @@ import { db } from "./db";
 import { users } from "./db/schema";
 import { eq } from "drizzle-orm";
 export async function hashPassword(password: string) {
-  const b64salt = env.SALT as string;
+  const b64salt = env.SALT;
   const salt = Buffer.from(b64salt, "base64");
   const hashed = await hash(password, salt.toString("utf8"));
   return hashed;
 }
 
 export async function verifyPassword(password: string, hashed: string) {
-  const b64salt = env.SALT as string;
+  const b64salt = env.SALT;
   const salt = Buffer.from(b64salt, "base64");
   const verified = await hash(password, salt.toString("utf8"));
   return verified === hashed;

@@ -3,13 +3,15 @@ import { hashPassword, withAuth } from "~/server/auth";
 import { db } from "~/server/db";
 import { userData, users } from "~/server/db/schema";
 import { and, eq } from "drizzle-orm";
-import { getUserDataById, getCapturedRegs } from "~/server/queries/user";
+import {
+  getUserDataById,
+  getCapturedRegs,
+  getTotalXp,
+} from "~/server/queries/user";
 
 export async function POST(req: Request) {
   const jsonBody = (await req.json()) as { email: string; password: string };
-  console.log(jsonBody);
   const hashed = await hashPassword(jsonBody.password);
-  console.log(hashed);
   const user = await db
     .select()
     .from(users)
@@ -17,7 +19,6 @@ export async function POST(req: Request) {
       and(eq(users.email, jsonBody.email), eq(users.hashedPassword, hashed)),
     )
     .execute();
-  console.log("User is ", user);
   if (!user[0]) {
     return NextResponse.json(
       { error: "Invalid username or password" },
@@ -25,7 +26,6 @@ export async function POST(req: Request) {
     );
   }
   const currentUserData = await getUserDataById(user[0].id);
-  console.log("Current user data is ", currentUserData);
   if (!currentUserData) {
     return NextResponse.json(
       { error: "Invalid username or password" },
@@ -34,10 +34,12 @@ export async function POST(req: Request) {
       },
     );
   }
+  console.log("CARDS", currentUserData.cards.length);
   const response = {
     token: user[0].token,
     userData: {
       ...currentUserData,
+      xp: await getTotalXp(currentUserData),
       cards: currentUserData.cards.map((c) => ({
         ...c,
         captures: c.captures.map((cptr) => ({
@@ -45,11 +47,17 @@ export async function POST(req: Request) {
         })),
         glowCount: c.glow ? 1 : 0,
       })),
+      numAircraftModels: currentUserData.cards.length,
+      unlockedModelIds: currentUserData.cards.map((c) => c.aircraftId),
+      items: currentUserData.items.map((i) => {
+        return { id: i.id, type: i.type };
+      }),
     },
     relocation: { airportId: 0, airport: 0, timestamp: 0 },
     capturedRegs: await getCapturedRegs(currentUserData),
     missions: [],
   };
+
   console.log(response);
   return NextResponse.json(response, { status: 201 });
 }
@@ -92,19 +100,22 @@ export async function GET(req: Request) {
       token: user.token,
       userData: {
         ...currentUserData,
+        xp: await getTotalXp(currentUserData),
         cards: currentUserData.cards.map((c) => ({
           ...c,
           captures: c.captures.map((cptr) => ({
             ...cptr,
           })),
           glowCount: c.glow ? 1 : 0,
+
+          numAircraftModel: currentUserData.cards.length,
         })),
-        numAircraftModel: currentUserData.cards.length,
       },
       relocation: { airportId: 0, airport: 0, timestamp: 0 },
       capturedRegs: await getCapturedRegs(currentUserData),
       missions: [],
     };
+
     console.log(response);
     return NextResponse.json(response, { status: 200 });
   });

@@ -96,9 +96,9 @@ export async function getUserDataById(
     .select()
     .from(userData)
     .where(eq(userData.userId, userId));
-  console.log("[getUserDataById] Base user:", user);
+  // console.log("[getUserDataById] Base user:", user);
   if (!user) {
-    console.warn(`[getUserDataById] No user found for userId: ${userId}`);
+    // console.warn(`[getUserDataById] No user found for userId: ${userId}`);
     return null;
   }
 
@@ -107,7 +107,7 @@ export async function getUserDataById(
     .from(cards)
     .where(eq(cards.userId, user.id))
     .execute();
-  console.log(`[getUserDataById] Found ${crds.length} cards for user.`);
+  // console.log(`[getUserDataById] Found ${crds.length} cards for user.`);
 
   const cardsWithCaptures: Card[] = await Promise.all(
     crds.map(async (card) => {
@@ -115,9 +115,9 @@ export async function getUserDataById(
         .select()
         .from(captures)
         .where(eq(captures.cardId, card.id));
-      console.log(
-        `[getUserDataById] Card ID ${card.id} has ${cptrs.length} captures.`,
-      );
+      // console.log(
+      //   `[getUserDataById] Card ID ${card.id} has ${cptrs.length} captures.`,
+      // );
       return {
         ...card,
         captures: cptrs,
@@ -149,13 +149,13 @@ export async function getUserDataById(
       .from(battleDeck)
       .where(eq(battleDeck.userId, userId)),
   ]);
-  console.log(`[getUserDataById] Related data:`);
-  console.log(` - Achievements: ${ach.length}`);
-  console.log(` - Items: ${itms.length}`);
-  console.log(` - Missions: ${mssns.length}`);
-  console.log(` - Friends: ${frnds.length}`);
-  console.log(` - Models: ${models.length}`);
-  console.log(` - Deck: ${deck.length}`);
+  // console.log(`[getUserDataById] Related data:`);
+  // console.log(` - Achievements: ${ach.length}`);
+  // console.log(` - Items: ${itms.length}`);
+  // console.log(` - Missions: ${mssns.length}`);
+  // console.log(` - Friends: ${frnds.length}`);
+  // console.log(` - Models: ${models.length}`);
+  // console.log(` - Deck: ${deck.length}`);
 
   // typecast items
   const typedItems = itms.map((item) => ({
@@ -170,14 +170,14 @@ export async function getUserDataById(
         .select()
         .from(missionData)
         .where(eq(missionData.missionId, mission.id));
-      console.log(
-        `[getUserDataById] Mission ID ${mission.id} has ${data.length} data entries.`,
-      );
+      // console.log(
+      //   `[getUserDataById] Mission ID ${mission.id} has ${data.length} data entries.`,
+      // );
       return { ...mission, data };
     }),
   );
 
-  console.log(`[getUserDataById] Done assembling user data for ${userId}`);
+  // console.log(`[getUserDataById] Done assembling user data for ${userId}`);
 
   const userDataFormatted: UserData = {
     ...user,
