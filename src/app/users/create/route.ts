@@ -1,16 +1,20 @@
+import { sign } from "jsonwebtoken";
 import { NextResponse } from "next/server";
+import { env } from "~/env";
 import { hashPassword } from "~/server/auth";
 import { db } from "~/server/db";
 import { userData, users } from "~/server/db/schema";
 
 export async function POST(req: Request) {
-  console.log(await req.text());
   const jsonBody = (await req.json()) as { password: string; email: string };
   console.log(jsonBody);
   const data = await db
     .insert(users)
     .values({
-      token: "wqrwwrw8rjwojwfhwgow",
+      token: sign({ email: jsonBody.email }, env.JWT_SECRET as string, {
+        expiresIn: "1y",
+      }),
+
       hashedPassword: await hashPassword(jsonBody.password),
       email: jsonBody.email,
     })
