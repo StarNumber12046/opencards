@@ -1,18 +1,17 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
-
+console.log(process.env);
 export const env = createEnv({
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app
    * isn't built with invalid env vars.
    */
   server: {
-    TURSO_CONNECTION_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
     SALT: z.string(),
-    TURSO_AUTH_TOKEN: z.string(),
+    DATABASE_URL: z.string(),
     JWT_SECRET: z.string(),
   },
 
@@ -30,9 +29,8 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
-    TURSO_CONNECTION_URL: process.env.TURSO_CONNECTION_URL,
     NODE_ENV: process.env.NODE_ENV,
-    TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN,
+    DATABASE_URL: process.env.DATABASE_URL,
     SALT: process.env.SALT,
     JWT_SECRET: process.env.JWT_SECRET,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,

@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
-import { index, sqliteTableCreator } from "drizzle-orm/sqlite-core";
+import { index, pgTableCreator } from "drizzle-orm/pg-core";
 import { v4 as uuid } from "uuid";
-export const createTable = sqliteTableCreator((name) => `opencards_${name}`);
+export const createTable = pgTableCreator((name) => `opencards_${name}`);
 
 export const users = createTable("user", (d) => ({
   token: d.text().notNull(),
@@ -27,26 +27,26 @@ export const userData = createTable("user_data", (d) => ({
   messagingToken: d.text(),
   xp: d.integer().notNull(),
   numExposures: d.integer().notNull(),
-  lastFilmHandout: d.integer().notNull(),
-  lastFilmHandoutTimeLeft: d.integer().notNull(),
+  lastFilmHandout: d.bigint({ mode: "number" }).notNull(),
+  lastFilmHandoutTimeLeft: d.bigint({ mode: "number" }).notNull(),
   coins: d.integer().notNull(),
-  lastCapture: d.integer().notNull(),
-  battleOnboardingCompleted: d.integer({ mode: "boolean" }).notNull(),
-  usernameCompleted: d.integer({ mode: "boolean" }).notNull(),
-  radarExpandTimeLeft: d.integer().notNull(),
-  unlimitedPhotosTimeLeft: d.integer().notNull(),
+  lastCapture: d.bigint({ mode: "number" }).notNull(),
+  battleOnboardingCompleted: d.boolean().notNull(),
+  usernameCompleted: d.boolean().notNull(),
+  radarExpandTimeLeft: d.bigint({ mode: "number" }).notNull(),
+  unlimitedPhotosTimeLeft: d.bigint({ mode: "number" }).notNull(),
   relocationAirportId: d.integer(),
   relocationAirport: d.integer().notNull(),
-  relocationTimestamp: d.integer().notNull(),
-  relocationTimeLeft: d.integer().notNull(),
+  relocationTimestamp: d.bigint({ mode: "number" }).notNull(),
+  relocationTimeLeft: d.bigint({ mode: "number" }).notNull(),
   avatar: d.text().notNull(),
-  isVerified: d.integer({ mode: "boolean" }).notNull(),
+  isVerified: d.boolean().notNull(),
   friendCode: d.text().notNull(),
   numAircraftModels: d.integer().notNull(),
   numDestinations: d.integer().notNull(),
   numBattleWins: d.integer().notNull(),
   numAchievements: d.integer().notNull(),
-  hasPendingFriendRequests: d.integer({ mode: "boolean" }).notNull(),
+  hasPendingFriendRequests: d.boolean().notNull(),
 }));
 
 export const achievements = createTable("achievement", (d) => ({
@@ -56,7 +56,7 @@ export const achievements = createTable("achievement", (d) => ({
     .notNull()
     .references(() => userData.id),
   progressNumerator: d.integer().notNull(),
-  isAchieved: d.integer({ mode: "boolean" }).notNull(),
+  isAchieved: d.boolean().notNull(),
 }));
 
 export const cards = createTable("card", (d) => ({
@@ -102,8 +102,8 @@ export const captures = createTable("capture", (d) => ({
   track: d.real().notNull(),
   icon: d.integer().notNull(),
   status: d.integer().notNull(),
-  timestamp: d.integer().notNull(),
-  onGround: d.integer({ mode: "boolean" }).notNull(),
+  timestamp: d.bigint({ mode: "number" }).notNull(),
+  onGround: d.boolean().notNull(),
   source: d.integer().notNull(),
   model: d.text().notNull(),
   xp: d.integer().notNull(),
@@ -113,11 +113,11 @@ export const captures = createTable("capture", (d) => ({
   imageLarge: d.text(),
   imageThumb: d.text(),
   imageCopy: d.text(),
-  glow: d.integer({ mode: "boolean" }).notNull(),
+  glow: d.boolean().notNull(),
 }));
 
 export const items = createTable("item", (d) => ({
-  id: d.integer().primaryKey(),
+  id: d.serial().primaryKey(),
   userId: d
     .text()
     .notNull()
@@ -126,7 +126,7 @@ export const items = createTable("item", (d) => ({
 }));
 
 export const missions = createTable("mission", (d) => ({
-  id: d.integer().primaryKey({ autoIncrement: true }),
+  id: d.serial().primaryKey(),
   userId: d
     .text()
     .notNull()
@@ -137,7 +137,7 @@ export const missions = createTable("mission", (d) => ({
 }));
 
 export const missionData = createTable("mission_data", (d) => ({
-  id: d.integer().primaryKey({ autoIncrement: true }),
+  id: d.integer().primaryKey(),
   missionId: d
     .integer()
     .notNull()
@@ -147,7 +147,7 @@ export const missionData = createTable("mission_data", (d) => ({
   award: d.integer().notNull(),
   type: d.text().notNull(),
   timestamp: d.integer().notNull(),
-  claimed: d.integer({ mode: "boolean" }).notNull(),
+  claimed: d.boolean().notNull(),
   percentage: d.integer().notNull(),
   length: d.integer().notNull(),
 }));

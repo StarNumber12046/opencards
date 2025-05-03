@@ -1,4 +1,4 @@
-import { db } from "~/server/db"; // your Drizzle database instance
+import { db } from "~/server/db"; //your Drizzle database instance
 import {
   userData,
   achievements,
@@ -91,14 +91,14 @@ export async function getCapturedRegs(user: { id: string }): Promise<string[]> {
 export async function getUserDataById(
   userId: string,
 ): Promise<UserData | null> {
-  // 1. Base userData
+  //1. Base userData
   const [user] = await db
     .select()
     .from(userData)
     .where(eq(userData.userId, userId));
-  // console.log("[getUserDataById] Base user:", user);
+  console.log("[getUserDataById] Base user:", user);
   if (!user) {
-    // console.warn(`[getUserDataById] No user found for userId: ${userId}`);
+    console.warn(`[getUserDataById] No user found for userId: ${userId}`);
     return null;
   }
 
@@ -107,7 +107,7 @@ export async function getUserDataById(
     .from(cards)
     .where(eq(cards.userId, user.id))
     .execute();
-  // console.log(`[getUserDataById] Found ${crds.length} cards for user.`);
+  console.log(`[getUserDataById] Found ${crds.length} cards for user.`);
 
   const cardsWithCaptures: Card[] = await Promise.all(
     crds.map(async (card) => {
@@ -115,9 +115,9 @@ export async function getUserDataById(
         .select()
         .from(captures)
         .where(eq(captures.cardId, card.id));
-      // console.log(
-      //   `[getUserDataById] Card ID ${card.id} has ${cptrs.length} captures.`,
-      // );
+      console.log(
+        `[getUserDataById] Card ID ${card.id} has ${cptrs.length} captures.`,
+      );
       return {
         ...card,
         captures: cptrs,
@@ -131,7 +131,7 @@ export async function getUserDataById(
     }),
   );
 
-  // 2. Related data
+  //2. Related data
   const [ach, itms, mssns, frnds, models, deck] = await Promise.all([
     db.select().from(achievements).where(eq(achievements.userId, userId)),
     db.select().from(items).where(eq(items.userId, userId)),
@@ -149,35 +149,35 @@ export async function getUserDataById(
       .from(battleDeck)
       .where(eq(battleDeck.userId, userId)),
   ]);
-  // console.log(`[getUserDataById] Related data:`);
-  // console.log(` - Achievements: ${ach.length}`);
-  // console.log(` - Items: ${itms.length}`);
-  // console.log(` - Missions: ${mssns.length}`);
-  // console.log(` - Friends: ${frnds.length}`);
-  // console.log(` - Models: ${models.length}`);
-  // console.log(` - Deck: ${deck.length}`);
+  console.log(`[getUserDataById] Related data:`);
+  console.log(` - Achievements: ${ach.length}`);
+  console.log(` - Items: ${itms.length}`);
+  console.log(` - Missions: ${mssns.length}`);
+  console.log(` - Friends: ${frnds.length}`);
+  console.log(` - Models: ${models.length}`);
+  console.log(` - Deck: ${deck.length}`);
 
-  // typecast items
+  //typecast items
   const typedItems = itms.map((item) => ({
     ...item,
     type: item.type as ItemType,
   }));
 
-  // 3. Attach mission data
+  //3. Attach mission data
   const missionWithData = await Promise.all(
     mssns.map(async (mission) => {
       const data = await db
         .select()
         .from(missionData)
         .where(eq(missionData.missionId, mission.id));
-      // console.log(
-      //   `[getUserDataById] Mission ID ${mission.id} has ${data.length} data entries.`,
-      // );
+      console.log(
+        `[getUserDataById] Mission ID ${mission.id} has ${data.length} data entries.`,
+      );
       return { ...mission, data };
     }),
   );
 
-  // console.log(`[getUserDataById] Done assembling user data for ${userId}`);
+  console.log(`[getUserDataById] Done assembling user data for ${userId}`);
 
   const userDataFormatted: UserData = {
     ...user,

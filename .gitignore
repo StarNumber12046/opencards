@@ -46,3 +46,4 @@ yarn-error.log*
 .idea
 
 blob.ts
+.vercel

@@ -10,7 +10,6 @@ import { eq } from "drizzle-orm";
 import { getUserDataById } from "~/server/queries/user";
 async function importData() {
   const cards = blob.cards;
-  const captures = cards.map((c) => c.captures).flat();
   // Import all cards for the first user in the db
   const user = await db
     .select()

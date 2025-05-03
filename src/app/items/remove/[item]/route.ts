@@ -23,7 +23,13 @@ export function DELETE(
       .where(eq(userData.id, currentUserData.id))
       .execute();
     console.log({ [item]: 1 });
-    await db.delete(items).where(eq(items.type, item)).limit(1).execute();
+    const dbItem = (
+      await db.select().from(items).where(eq(items.type, item)).execute()
+    )[0];
+    if (!dbItem) {
+      return NextResponse.json({ error: "No item found" }, { status: 400 });
+    }
+    await db.delete(items).where(eq(items.id, dbItem.id)).execute();
     return NextResponse.json({
       success: true,
     });
