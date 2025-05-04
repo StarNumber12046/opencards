@@ -17,11 +17,13 @@ export function POST(req: Request) {
       .returning({
         id: userData.id,
         numExposures: userData.numExposures,
+        unlimitedPhotosExpiryTime: userData.unlimitedPhotosExpiryTime,
       })
       .execute();
     return NextResponse.json({
       numExposures: returnData?.numExposures ?? 5,
-      unlimitedPhotosTimeLeft: 0,
+      unlimitedPhotosTimeLeft:
+        (returnData!.unlimitedPhotosExpiryTime - Date.now()) / 1000,
       lastFilmHandoutTimeLeft: 1044,
       radarExpandTimeLeft: 0,
       relocationTimeLeft: 0,

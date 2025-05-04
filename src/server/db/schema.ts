@@ -34,7 +34,7 @@ export const userData = createTable("user_data", (d) => ({
   battleOnboardingCompleted: d.boolean().notNull(),
   usernameCompleted: d.boolean().notNull(),
   radarExpandTimeLeft: d.bigint({ mode: "number" }).notNull(),
-  unlimitedPhotosTimeLeft: d.bigint({ mode: "number" }).notNull(),
+  unlimitedPhotosExpiryTime: d.bigint({ mode: "number" }).notNull(),
   relocationAirportId: d.integer(),
   relocationAirport: d.integer().notNull(),
   relocationTimestamp: d.bigint({ mode: "number" }).notNull(),

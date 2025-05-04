@@ -99,10 +99,13 @@ export async function PATCH(req: Request) {
   return withAuth(req, async (user) => {
     const jsonBody = (await req.json()) as { messagingToken: string };
 
-    await db
+    const returnValues = await db
       .update(userData)
       .set({ messagingToken: jsonBody.messagingToken })
       .where(eq(userData.userId, user.id))
+      .returning({
+        unlimitedPhotosExpiryTime: userData.unlimitedPhotosExpiryTime,
+      })
       .execute();
 
     return NextResponse.json({
@@ -110,7 +113,8 @@ export async function PATCH(req: Request) {
       lastFilmHandoutTimeLeft: 0,
       lastCapture: 0,
       radarExpandTimeLeft: 0,
-      unlimitedPhotosTimeLeft: 0,
+      unlimitedPhotosTimeLeft:
+        (returnValues[0]!.unlimitedPhotosExpiryTime - Date.now()) / 1000,
       relocation: {},
       relocationTimeLeft: 0,
       isVerified: false,

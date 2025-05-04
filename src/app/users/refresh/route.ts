@@ -12,7 +12,8 @@ export function GET(req: Request) {
       coins: userData.coins,
       numExposures: userData.numExposures,
       lastFilmHandoutTimeLeft: 1050,
-      unlimitedPhotosTimeLeft: 0,
+      unlimitedPhotosTimeLeft:
+        (userData.unlimitedPhotosExpiryTime - Date.now()) / 1000,
       radarExpandTimeLeft: 0,
       relocationTimeLeft: 0,
     };

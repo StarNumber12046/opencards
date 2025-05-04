@@ -8,7 +8,7 @@ import { getTotalXp, getDbUserDataById } from "~/server/queries/user";
 const possibleChoices = {
   photos_unlimited_1: { cost: 75, photos: 0, unlimitedTimeLeft: 0.5 * 60 * 60 },
   photos_unlimited_2: { cost: 150, photos: 0, unlimitedTimeLeft: 2 * 60 * 60 },
-  photos_5: { cost: 10, photos: 0, unlimitedTimeLeft: 5 * 60 },
+  photos_5: { cost: 10, photos: 5, unlimitedTimeLeft: 0 },
 };
 
 export function POST(req: Request) {
@@ -34,7 +34,8 @@ export function POST(req: Request) {
         coins: currentUserData.coins - purchasePackage.cost,
         numExposures: currentUserData.numExposures + purchasePackage.photos,
         lastFilmHandoutTimeLeft: Date.now(),
-        unlimitedPhotosTimeLeft: purchasePackage.unlimitedTimeLeft,
+        unlimitedPhotosExpiryTime:
+          Date.now() + purchasePackage.unlimitedTimeLeft * 1000,
       })
       .where(eq(userData.userId, user.id))
       .execute();
