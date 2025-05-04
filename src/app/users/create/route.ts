@@ -37,7 +37,7 @@ export async function POST(req: Request) {
       battleOnboardingCompleted: false,
       usernameCompleted: false,
       radarExpandTimeLeft: 0,
-      unlimitedPhotosTimeLeft: 0,
+      unlimitedPhotosExpiryTime: Date.now(),
       relocationAirportId: 0,
       relocationAirport: 0,
       relocationTimestamp: 0,

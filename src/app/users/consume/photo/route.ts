@@ -23,7 +23,7 @@ export function POST(req: Request) {
     return NextResponse.json({
       numExposures: returnData?.numExposures ?? 5,
       unlimitedPhotosTimeLeft:
-        (returnData!.unlimitedPhotosExpiryTime - Date.now()) / 1000,
+        returnData!.unlimitedPhotosExpiryTime - Date.now(),
       lastFilmHandoutTimeLeft: 1044,
       radarExpandTimeLeft: 0,
       relocationTimeLeft: 0,
