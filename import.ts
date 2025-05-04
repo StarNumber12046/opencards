@@ -7,7 +7,7 @@ import {
   captures as db_captures,
 } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
-import { getUserDataById } from "~/server/queries/user";
+import { getFullUserDataById } from "~/server/queries/user";
 async function importData() {
   const cards = blob.cards;
   // Import all cards for the first user in the db
@@ -21,7 +21,7 @@ async function importData() {
     console.log("NO USER");
     return;
   }
-  const currentUserData = await getUserDataById(user[0].id);
+  const currentUserData = await getFullUserDataById(user[0].id);
   if (!currentUserData) {
     console.log("NO USER DATA");
     return;

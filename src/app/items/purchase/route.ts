@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { withAuth } from "~/server/auth";
+import { getUserDataByToken, withAuth } from "~/server/auth";
 import { db } from "~/server/db";
 import { userData, items } from "~/server/db/schema";
-import { getUserDataById } from "~/server/queries/user";
+import { getDbUserDataById, getFullUserDataById } from "~/server/queries/user";
 
 const itemMaps = [
   {
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
   return withAuth(req, async (user) => {
     const jsonBody = (await req.json()) as { productId: string };
     const item = itemMaps.find((i) => i.id === jsonBody.productId);
-    const currentUserData = await getUserDataById(user.id);
+    const currentUserData = await getDbUserDataById(user.id);
     if (!item) {
       return NextResponse.json({ error: "No item found" }, { status: 400 });
     }

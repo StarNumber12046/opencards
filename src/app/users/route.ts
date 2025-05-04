@@ -4,7 +4,7 @@ import { db } from "~/server/db";
 import { userData, users } from "~/server/db/schema";
 import { and, eq } from "drizzle-orm";
 import {
-  getUserDataById,
+  getFullUserDataById,
   getCapturedRegs,
   getTotalXp,
 } from "~/server/queries/user";
@@ -58,7 +58,7 @@ async function authenticateUser(email: string, hashedPassword: string) {
     return { error: "Invalid username or password", status: 401 };
   }
 
-  const currentUserData = await getUserDataById(user[0].id);
+  const currentUserData = await getFullUserDataById(user[0].id);
   if (!currentUserData) {
     return { error: "Invalid username or password", status: 401 };
   }
@@ -121,7 +121,7 @@ export async function PATCH(req: Request) {
 
 export async function GET(req: Request) {
   return withAuth(req, async (user) => {
-    const currentUserData = await getUserDataById(user.id);
+    const currentUserData = await getFullUserDataById(user.id);
 
     if (!currentUserData) {
       return NextResponse.json(

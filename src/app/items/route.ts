@@ -3,10 +3,10 @@ import { withAuth } from "~/server/auth";
 import { db } from "~/server/db";
 import { eq } from "drizzle-orm";
 import { items } from "~/server/db/schema";
-import { getUserDataById } from "~/server/queries/user";
+import { getDbUserDataById } from "~/server/queries/user";
 export function GET(req: Request) {
   return withAuth(req, async (user) => {
-    const currentUserData = await getUserDataById(user.id);
+    const currentUserData = await getDbUserDataById(user.id);
     if (!currentUserData) {
       return NextResponse.json({ error: "No user found" }, { status: 405 });
     }

@@ -9,13 +9,13 @@ import {
   getCardStats,
   getTier,
   getTotalXp,
-  getUserDataById,
+  getDbUserDataById,
 } from "~/server/queries/user";
 export async function POST(req: Request) {
   return withAuth(req, async (user) => {
     const jsonBody = (await req.json()) as CapturePayload;
     console.log(jsonBody);
-    const currentUserData = await getUserDataById(user.id);
+    const currentUserData = await getDbUserDataById(user.id);
     if (!currentUserData) {
       return NextResponse.json({ error: "No user found" }, { status: 405 });
     }

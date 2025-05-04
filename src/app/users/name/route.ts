@@ -3,12 +3,12 @@ import { NextResponse } from "next/server";
 import { withAuth } from "~/server/auth";
 import { db } from "~/server/db";
 import { userData } from "~/server/db/schema";
-import { getUserDataById } from "~/server/queries/user";
+import { getDbUserDataById } from "~/server/queries/user";
 
 export async function POST(req: Request) {
   return withAuth(req, async (user) => {
     const jsonBody = (await req.json()) as { name: string };
-    const currentUserData = await getUserDataById(user.id);
+    const currentUserData = await getDbUserDataById(user.id);
     if (!currentUserData) {
       return NextResponse.json({ error: "No user found" }, { status: 405 });
     }

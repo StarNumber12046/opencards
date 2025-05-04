@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { withAuth } from "~/server/auth";
-import { getTotalXp, getUserDataById } from "~/server/queries/user";
+import { getTotalXp, getDbUserDataById } from "~/server/queries/user";
 export function GET(req: Request) {
   return withAuth(req, async (user) => {
-    const userData = await getUserDataById(user.id);
+    const userData = await getDbUserDataById(user.id);
     if (!userData) {
       return NextResponse.json({ error: "No user found" }, { status: 405 });
     }

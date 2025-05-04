@@ -3,11 +3,11 @@ import { NextResponse } from "next/server";
 import { withAuth } from "~/server/auth";
 import { db } from "~/server/db";
 import { userData } from "~/server/db/schema";
-import { getUserDataById } from "~/server/queries/user";
+import { getDbUserDataById } from "~/server/queries/user";
 export function POST(req: Request) {
   return withAuth(req, async (user) => {
     const jsonBody = (await req.json()) as { amount: number };
-    const currentUserData = await getUserDataById(user.id);
+    const currentUserData = await getDbUserDataById(user.id);
     const [returnData] = await db
       .update(userData)
       .set({

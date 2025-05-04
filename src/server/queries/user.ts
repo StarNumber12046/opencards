@@ -99,7 +99,7 @@ export async function getCapturedRegs(user: { id: string }): Promise<string[]> {
 /**
  * Get complete user data by user ID
  */
-export async function getUserDataById(
+export async function getFullUserDataById(
   userId: string,
 ): Promise<UserData | null> {
   // Fetch base user data
@@ -189,4 +189,14 @@ export async function getUserDataById(
     battleDeck: userDeck.map((c) => c.cardId),
     relocation: { airportId: null, airport: 0, timestamp: 0 },
   };
+}
+
+export async function getDbUserDataById(userId: string) {
+  return (
+    await db
+      .select()
+      .from(userData)
+      .where(eq(userData.userId, userId))
+      .execute()
+  )[0];
 }

@@ -3,14 +3,14 @@ import { NextResponse } from "next/server";
 import { withAuth } from "~/server/auth";
 import { db } from "~/server/db";
 import { userData, items } from "~/server/db/schema";
-import { getUserDataById } from "~/server/queries/user";
+import { getFullUserDataById } from "~/server/queries/user";
 export function DELETE(
   req: Request,
   { params }: { params: Promise<{ item: string }> },
 ) {
   return withAuth(req, async (user) => {
     const item = (await params).item;
-    const currentUserData = await getUserDataById(user.id);
+    const currentUserData = await getFullUserDataById(user.id);
     if (!currentUserData) {
       return NextResponse.json({ error: "No user found" }, { status: 405 });
     }
