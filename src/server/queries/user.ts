@@ -188,6 +188,10 @@ export async function getFullUserDataById(
     unlockedModelIds: userModels.map((m) => m.modelId),
     battleDeck: userDeck.map((c) => c.cardId),
     relocation: { airportId: null, airport: 0, timestamp: 0 },
+    unlimitedPhotosTimeLeft:
+      Date.now() - user.unlimitedPhotosExpiryTime > 0
+        ? Date.now() - user.unlimitedPhotosExpiryTime
+        : 0,
   };
 }
 
