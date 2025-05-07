@@ -33,4 +33,5 @@ export interface CapturePayload {
   coins: number;
   newAirport: boolean;
   hex: string;
+  itemUsed: string | null;
 }

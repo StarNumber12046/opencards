@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { withAuth } from "~/server/auth";
-import { captures, userData } from "~/server/db/schema";
+import { captures, items, userData } from "~/server/db/schema";
 import type { CapturePayload } from "~/types/captures";
 import { eq, and } from "drizzle-orm";
 import { db } from "~/server/db";
@@ -242,6 +242,30 @@ export async function POST(req: Request) {
       ],
     };
     console.log(JSON.stringify(response));
+    if (jsonBody.itemUsed) {
+      // Remove one occourence of the item from the user's inventory
+      const occourences = await db
+        .select()
+        .from(items)
+        .where(
+          and(
+            eq(items.userId, currentUserData.id),
+            eq(items.type, jsonBody.itemUsed),
+          ),
+        )
+        .execute();
+      if (occourences.length > 0) {
+        await db
+          .delete(items)
+          .where(
+            and(
+              eq(items.userId, currentUserData.id),
+              eq(items.id, occourences[0]?.id ?? -1),
+            ),
+          )
+          .execute();
+      }
+    }
     return NextResponse.json(response, { status: 201 });
   });
 }
