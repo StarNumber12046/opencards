@@ -36,9 +36,6 @@ export function POST(req: Request) {
   return withAuth(req, async (user) => {
     const jsonBody = (await req.json()) as { productId: string };
 
-    if (!currentUserData) {
-      return NextResponse.json({ error: "No user found" }, { status: 405 });
-    }
     const purchasePackage =
       possibleChoices[
         jsonBody.productId as
@@ -59,6 +56,8 @@ export function POST(req: Request) {
           lastFilmHandoutTimeLeft: Date.now(),
           unlimitedPhotosExpiryTime:
             Date.now() + purchasePackage.unlimitedTimeLeft * 1000,
+          radarExpandEndTimestamp:
+            Date.now() + purchasePackage.radarExpandTimeLeft * 1000,
         })
         .where(eq(userData.userId, user.id))
         .returning({
@@ -66,7 +65,8 @@ export function POST(req: Request) {
           numExposures: userData.numExposures,
           lastFilmHandoutTimeLeft: userData.lastFilmHandoutTimeLeft,
           unlimitedPhotosExpiryTime: userData.unlimitedPhotosExpiryTime,
-          radarExpandTimeLeft: userData.radarExpandTimeLeft,
+          radarExpandEndTimestamp: userData.radarExpandEndTimestamp,
+          relocationEndTimestamp: userData.relocationEndTimestamp,
         })
         .execute();
       return NextResponse.json({
@@ -74,8 +74,10 @@ export function POST(req: Request) {
         photosUnlimited: purchasePackage.photos,
         lastFilmHandoutTimeLeft: 1050,
         unlimitedPhotosTimeLeft: purchasePackage.unlimitedTimeLeft,
-        radarExpandTimeLeft: response?.radarExpandTimeLeft ?? 0,
-        relocationTimeLeft: 0,
+        radarExpandTimeLeft:
+          ((response?.radarExpandEndTimestamp ?? 0) - Date.now()) / 1000,
+        relocationTimeLeft:
+          ((response?.relocationEndTimestamp ?? 0) - Date.now()) / 1000,
       });
     } else {
       const [response] = await db
@@ -84,6 +86,8 @@ export function POST(req: Request) {
           coins: sql`${userData.coins} - ${purchasePackage.cost}`,
           numExposures: sql`${userData.numExposures} + ${purchasePackage.photos}`,
           lastFilmHandoutTimeLeft: Date.now(),
+          radarExpandEndTimestamp:
+            Date.now() + purchasePackage.radarExpandTimeLeft * 1000,
         })
         .where(eq(userData.userId, user.id))
         .returning({
@@ -91,7 +95,8 @@ export function POST(req: Request) {
           numExposures: userData.numExposures,
           lastFilmHandoutTimeLeft: userData.lastFilmHandoutTimeLeft,
           unlimitedPhotosExpiryTime: userData.unlimitedPhotosExpiryTime,
-          radarExpandTimeLeft: userData.radarExpandTimeLeft,
+          radarExpandTimeLeft: userData.radarExpandEndTimestamp,
+          relocationEndTimestamp: userData.relocationEndTimestamp,
         })
         .execute();
       return NextResponse.json({
@@ -99,8 +104,10 @@ export function POST(req: Request) {
         photosUnlimited: purchasePackage.photos,
         lastFilmHandoutTimeLeft: 1050,
         unlimitedPhotosTimeLeft: purchasePackage.unlimitedTimeLeft,
-        radarExpandTimeLeft: response?.radarExpandTimeLeft ?? 0,
-        relocationTimeLeft: 0,
+        radarExpandTimeLeft:
+          (response?.radarExpandTimeLeft ?? 0 - Date.now()) / 1000,
+        relocationTimeLeft:
+          ((response?.relocationEndTimestamp ?? 0) - Date.now()) / 1000,
       });
     }
   });

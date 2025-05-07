@@ -38,7 +38,11 @@ function formatUserResponse(
         type: i.type,
       })),
     },
-    relocation: { airportId: 0, airport: 0, timestamp: 0 },
+    relocation: {
+      airportId: currentUserData.relocation.airportId,
+      airport: currentUserData.relocation.airport,
+      timestamp: currentUserData.relocation.timestamp,
+    },
     capturedRegs,
     missions: [],
   };
@@ -105,6 +109,11 @@ export async function PATCH(req: Request) {
       .where(eq(userData.userId, user.id))
       .returning({
         unlimitedPhotosExpiryTime: userData.unlimitedPhotosExpiryTime,
+        radarExpandEndTimestamp: userData.radarExpandEndTimestamp,
+        relocationEndTimestamp: userData.relocationEndTimestamp,
+        relocationAirportId: userData.relocationAirportId,
+        relocationAirport: userData.relocationAirport,
+        relocationTimestamp: userData.relocationTimestamp,
       })
       .execute();
 
@@ -112,12 +121,18 @@ export async function PATCH(req: Request) {
       messagingToken: jsonBody.messagingToken,
       lastFilmHandoutTimeLeft: 0,
       lastCapture: 0,
-      radarExpandTimeLeft: 0,
+      radarExpandTimeLeft:
+        (returnValues[0]!.radarExpandEndTimestamp - Date.now()) / 1000,
       unlimitedPhotosTimeLeft:
         (returnValues[0]!.unlimitedPhotosExpiryTime - Date.now()) / 1000,
-      relocation: {},
-      relocationTimeLeft: 0,
-      isVerified: false,
+      relocation: {
+        airportId: returnValues[0]!.relocationAirportId,
+        airport: returnValues[0]!.relocationAirport,
+        timestamp: returnValues[0]!.relocationTimestamp,
+      },
+      relocationTimeLeft:
+        (returnValues[0]!.relocationEndTimestamp - Date.now()) / 1000,
+      isVerified: true,
       hasPendingFriendRequests: false,
     });
   });
