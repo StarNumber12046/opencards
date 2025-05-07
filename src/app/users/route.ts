@@ -114,7 +114,7 @@ export async function PATCH(req: Request) {
       lastCapture: 0,
       radarExpandTimeLeft: 0,
       unlimitedPhotosTimeLeft:
-        returnValues[0]!.unlimitedPhotosExpiryTime - Date.now(),
+        (returnValues[0]!.unlimitedPhotosExpiryTime - Date.now()) / 1000,
       relocation: {},
       relocationTimeLeft: 0,
       isVerified: false,
