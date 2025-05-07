@@ -122,9 +122,13 @@ export async function PATCH(req: Request) {
       lastFilmHandoutTimeLeft: 0,
       lastCapture: 0,
       radarExpandTimeLeft:
-        (returnValues[0]!.radarExpandEndTimestamp - Date.now()) / 1000,
+        returnValues[0]!.radarExpandEndTimestamp - Date.now() > 0
+          ? (returnValues[0]!.radarExpandEndTimestamp - Date.now()) / 1000
+          : 0,
       unlimitedPhotosTimeLeft:
-        (returnValues[0]!.unlimitedPhotosExpiryTime - Date.now()) / 1000,
+        returnValues[0]!.unlimitedPhotosExpiryTime - Date.now() > 0
+          ? (returnValues[0]!.unlimitedPhotosExpiryTime - Date.now()) / 1000
+          : 0,
       relocation: {
         airportId: returnValues[0]!.relocationAirportId,
         airport: returnValues[0]!.relocationAirport,
