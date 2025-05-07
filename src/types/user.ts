@@ -131,7 +131,7 @@ export interface Datum {
 }
 
 export interface Relocation {
-  airportId: null;
+  airportId: number | null;
   airport: number;
   timestamp: number;
 }

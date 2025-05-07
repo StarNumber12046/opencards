@@ -14,8 +14,9 @@ export function GET(req: Request) {
       lastFilmHandoutTimeLeft: 1050,
       unlimitedPhotosTimeLeft:
         (userData.unlimitedPhotosExpiryTime - Date.now()) / 1000,
-      radarExpandTimeLeft: 0,
-      relocationTimeLeft: 0,
+      radarExpandTimeLeft:
+        (userData.radarExpandEndTimestamp - Date.now()) / 1000,
+      relocationTimeLeft: (userData.relocationEndTimestamp - Date.now()) / 1000,
     };
     console.log(response);
     return NextResponse.json(response);

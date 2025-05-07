@@ -187,11 +187,17 @@ export async function getFullUserDataById(
     friendIds: userFriends.map((f) => f.friendId),
     unlockedModelIds: userModels.map((m) => m.modelId),
     battleDeck: userDeck.map((c) => c.cardId),
-    relocation: { airportId: null, airport: 0, timestamp: 0 },
+    relocation: {
+      airportId: user.relocationAirportId,
+      airport: user.relocationAirport,
+      timestamp: user.relocationTimestamp,
+    },
     unlimitedPhotosTimeLeft:
       Date.now() - user.unlimitedPhotosExpiryTime > 0
         ? Date.now() - user.unlimitedPhotosExpiryTime
         : 0,
+    radarExpandTimeLeft: (user.radarExpandEndTimestamp - Date.now()) / 1000,
+    relocationTimeLeft: (user.relocationEndTimestamp - Date.now()) / 1000,
   };
 }
 

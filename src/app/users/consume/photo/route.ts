@@ -18,6 +18,8 @@ export function POST(req: Request) {
         id: userData.id,
         numExposures: userData.numExposures,
         unlimitedPhotosExpiryTime: userData.unlimitedPhotosExpiryTime,
+        radarExpandEndTimestamp: userData.radarExpandEndTimestamp,
+        relocationEndTimestamp: userData.relocationEndTimestamp,
       })
       .execute();
     return NextResponse.json({
@@ -25,8 +27,10 @@ export function POST(req: Request) {
       unlimitedPhotosTimeLeft:
         returnData!.unlimitedPhotosExpiryTime - Date.now(),
       lastFilmHandoutTimeLeft: 1044,
-      radarExpandTimeLeft: 0,
-      relocationTimeLeft: 0,
+      radarExpandTimeLeft:
+        (Date.now() - returnData!.radarExpandEndTimestamp) / 1000,
+      relocationTimeLeft:
+        (Date.now() - returnData!.relocationEndTimestamp) / 1000,
     });
   });
 }

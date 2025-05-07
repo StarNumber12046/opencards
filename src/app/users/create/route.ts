@@ -36,12 +36,11 @@ export async function POST(req: Request) {
       lastCapture: Date.now(),
       battleOnboardingCompleted: false,
       usernameCompleted: false,
-      radarExpandTimeLeft: 0,
+      radarExpandEndTimestamp: Date.now(),
       unlimitedPhotosExpiryTime: Date.now(),
       relocationAirportId: 0,
       relocationAirport: 0,
       relocationTimestamp: 0,
-      relocationTimeLeft: 0,
       isVerified: true,
       friendCode: "null",
       numAircraftModels: 0,
@@ -50,6 +49,7 @@ export async function POST(req: Request) {
       numAchievements: 0,
       hasPendingFriendRequests: false,
       messagingToken: null,
+      relocationEndTimestamp: Date.now(),
       email: jsonBody.email,
     })
     .execute();
