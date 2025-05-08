@@ -17,6 +17,18 @@ const config = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**.skycards.oldapes.com",
+      },
+      {
+        protocol: "https",
+        hostname: "yq6gb3kpv5.ufs.sh",
+      },
+    ],
+  },
 };
 
 export default config;
