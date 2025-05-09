@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { Suspense } from "react";
 import Link from "next/link";
+import type { Assets } from "./assets";
 import { getCardStats } from "~/server/queries/user";
 import { CardComponent } from "./card";
 import type { ModelsFile } from "./models";
@@ -14,7 +15,15 @@ async function Deck({ userDataId }: { userDataId: string }) {
     cache: "force-cache",
     next: { revalidate: false },
   });
+  const modelsIndexFile = await fetch(
+    "https://cdn.skycards.oldapes.com/assets/index.json",
+    {
+      cache: "force-cache",
+      next: { revalidate: false },
+    },
+  );
   const models = (await modelsFile.json()) as ModelsFile;
+  const modelsIndex = (await modelsIndexFile.json()) as Assets;
   const rows = await db
     .select({
       card: cards,
@@ -52,6 +61,7 @@ async function Deck({ userDataId }: { userDataId: string }) {
             key={card.id}
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             modelsFile={models}
+            modelsIndexFile={modelsIndex}
           />
         );
       })}
