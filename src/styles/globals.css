@@ -1,6 +1,44 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+  font-family: 'FlightDeck';
+  src: url('https://yq6gb3kpv5.ufs.sh/f/7HneIh2oDecxyQ4WLjub5QLGtPSH8iUR3oTBWIMrxa9dOC1l') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'FlightDeckBold';
+
+  src: url('https://yq6gb3kpv5.ufs.sh/f/7HneIh2oDecxSvcxyBFqWjLG9mPgoVBOcNeXDdx68MtQTC5b') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'FlightDeckBlack';
+  src: url('https://yq6gb3kpv5.ufs.sh/f/7HneIh2oDecxYAFq5nVav1eLRPCu6AWZcqoj5iQXHx0JsMG8');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-flightdeck {
+  font-family: 'FlightDeck';
+}
+
+.font-flightdeck-bold {
+  font-family: 'FlightDeckBold';
+}
+
+.font-flightdeck-black {
+  font-family: 'FlightDeckBlack';
+}
+
+
 @custom-variant dark (&:is(.dark *));
 
 html,

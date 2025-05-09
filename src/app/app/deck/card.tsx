@@ -7,6 +7,7 @@ import React from "react";
 import { CardCategory, type ModelsFile, type Row } from "./models";
 import type { Capture } from "~/types/user";
 import type { Assets } from "./assets";
+import { CameraIcon } from "./icons";
 
 function getCardStats(captures: Capture[]) {
   if (captures.length === 0) {
@@ -30,7 +31,7 @@ function getCardStats(captures: Capture[]) {
 
 function getCardTextColor(xp: number) {
   if (xp >= 50000) {
-    return "text-yellow-600";
+    return "text-[#896a1c]";
   }
   if (xp >= 15000) {
     return "text-neutral-500";
@@ -49,6 +50,16 @@ function getCardOuterClass(glow: boolean, xp: number) {
     return "bg-gradient-to-tl from-gray-600 to-gray-200";
   }
   return "bg-white";
+}
+
+function getLowerTextColor(xp: number) {
+  if (xp >= 50000) {
+    return "text-white";
+  }
+  if (xp >= 15000) {
+    return "text-white";
+  }
+  return "text-black";
 }
 
 function getCardInnerClass(xp: number) {
@@ -84,7 +95,7 @@ function getRarityImage(model: string, modelsFile: ModelsFile) {
     case CardCategory.Historical:
       return "https://yq6gb3kpv5.ufs.sh/f/7HneIh2oDecxVupVuS4vOQ2lxG9tfIPH7Z3uCoL0rsKyFbg4";
   }
-  return "";
+  return null;
 }
 
 function getAircraftDetails(aircraftId: string, modelsFile: ModelsFile) {
@@ -106,7 +117,6 @@ function getAircraftImage(
   if (!modelRow) {
     return "";
   }
-  console.log("aircraft: ", modelsIndexFile.models.images[tier][aircraftId]);
   if (!modelsIndexFile.models.images[tier][aircraftId + "_lg.png"]) {
     if (modelRow.images) {
       return `https://cdn.skycards.oldapes.com/assets/models/images/${tier}/${modelRow.images[0]}_lg.png`;
@@ -154,8 +164,7 @@ export function CardComponent({
 }) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0 });
-  const { glow, xp } = getCardStats(captures);
-
+  const { glow, xp, cloudiness, coverage } = getCardStats(captures);
   const [rarityImageUrl, setRarityImageUrl] = React.useState<string | null>(
     null,
   );
@@ -190,12 +199,12 @@ export function CardComponent({
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       ref={ref}
       className={
-        "flex flex-col rounded-3xl p-2 bg-gradient-to-br w-xs min-h-[28rem] " +
+        "flex flex-col rounded-3xl p-2 bg-gradient-to-br w-xs font-flightdeck-bold " +
         getCardOuterClass(glow, xp)
       }
     >
       <div
-        className={`flex flex-col items-center rounded-2xl p-4 h-full ${getCardInnerClass(
+        className={`flex flex-col items-center rounded-2xl p-4 min-h-[32rem] h-full ${getCardInnerClass(
           xp,
         )}`}
       >
@@ -211,20 +220,23 @@ export function CardComponent({
             Loading image...
           </div>
         )}
-        {planeImageUrl ? (
-          <Image
-            src={planeImageUrl}
-            alt={card.aircraftId}
-            width={250}
-            className="-top-16 relative"
-            height={50}
-            objectFit="cover"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            Loading image...
-          </div>
-        )}
+        <Image
+          loader={(_props) =>
+            getAircraftImage(
+              card.aircraftId,
+              formatTier(xp),
+              modelsFile,
+              modelsIndexFile,
+            )
+          }
+          src={card.aircraftId + ".png"}
+          alt={card.aircraftId}
+          width={250}
+          className="-top-16 relative"
+          height={50}
+          objectFit="cover"
+        />
+
         <div className="-mt-28 relative">
           <h1
             className={`text-2xl font-bold text-center text-shadow-sm text-[${getHeaderColor((aircraftDetails?.cardCategory ?? "common") as CardCategory)}]`}
@@ -235,7 +247,9 @@ export function CardComponent({
             }}
           >
             {aircraftDetails?.manufacturer} {aircraftDetails?.name}
-            <div className={"grid grid-cols-2 gap-2 " + getCardTextColor(xp)}>
+            <div
+              className={"mt-4 grid grid-cols-2 gap-2 " + getCardTextColor(xp)}
+            >
               <div className="flex flex-col gap-1">
                 <h1 className="text-4xl font-bold text-center text-shadow-sm ">
                   {aircraftDetails?.firstFlight}
@@ -275,6 +289,17 @@ export function CardComponent({
             </div>
           </h1>
         </div>
+      </div>
+      <div
+        className={
+          "flex flex-row w-full items-center content-center gap-2 py-0.5 px-2 justify-center " +
+          getLowerTextColor(xp)
+        }
+      >
+        <p>{formatTier(xp).toUpperCase()}</p>
+        <p>{xp} XP</p>
+        <p className="inline-flex">{Math.round(coverage)}%</p>
+        <p className="inline-flex">{Math.round(cloudiness)}%</p>
       </div>
     </div>
   );
