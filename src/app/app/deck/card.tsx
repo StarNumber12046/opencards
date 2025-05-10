@@ -120,7 +120,6 @@ function getAircraftImage(
     if (modelRow.images) {
       return `https://cdn.skycards.oldapes.com/assets/models/images/${tier}/${modelRow.images[0]}_lg.png`;
     }
-    return `https://cdn.skycards.oldapes.com/assets/models/images/${tier}/${aircraftId}_lg.png`;
   }
   return `https://cdn.skycards.oldapes.com/assets/models/images/${tier}/${aircraftId}_lg.png`;
 }
