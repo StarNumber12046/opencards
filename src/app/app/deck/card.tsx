@@ -7,7 +7,7 @@ import React from "react";
 import { CardCategory, type ModelsFile, type Row } from "./models";
 import type { Capture } from "~/types/user";
 import type { Assets } from "./assets";
-import { CameraIcon } from "./icons";
+import { FaCamera, FaCloud } from "react-icons/fa";
 
 function getCardStats(captures: Capture[]) {
   if (captures.length === 0) {
@@ -78,7 +78,7 @@ function getRarityImage(model: string, modelsFile: ModelsFile) {
   const modelRow = modelsFile.rows.find((row) => row.id === model);
   console.log(modelsFile);
   if (!modelRow) {
-    return "";
+    return null;
   }
   switch (modelRow.cardCategory) {
     case CardCategory.Common:
@@ -165,34 +165,20 @@ export function CardComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0 });
   const { glow, xp, cloudiness, coverage } = getCardStats(captures);
-  const [rarityImageUrl, setRarityImageUrl] = React.useState<string | null>(
-    null,
-  );
+
   const [aircraftDetails, setAircraftDetails] = React.useState<Row | null>(
     null,
   );
-  const [planeImageUrl, setPlaneImageUrl] = React.useState<string | null>(null);
+
   React.useEffect(() => {
-    if (inView && !rarityImageUrl) {
-      setRarityImageUrl(getRarityImage(card.aircraftId, modelsFile));
-    }
-    if (inView && !planeImageUrl) {
-      setPlaneImageUrl(
-        getAircraftImage(
-          card.aircraftId,
-          formatTier(xp),
-          modelsFile,
-          modelsIndexFile,
-        ) ?? "",
-      );
-    }
+    console.log(aircraftDetails);
     if (inView && !aircraftDetails) {
       setAircraftDetails(
         getAircraftDetails(card.aircraftId, modelsFile) ?? null,
       );
       console.log(aircraftDetails);
     }
-  }, [inView, rarityImageUrl, planeImageUrl, aircraftDetails]);
+  }, [inView, aircraftDetails]);
 
   return (
     <div
@@ -204,22 +190,25 @@ export function CardComponent({
       }
     >
       <div
-        className={`flex flex-col items-center rounded-2xl p-4 min-h-[32rem] h-full ${getCardInnerClass(
-          xp,
-        )}`}
+        className={`flex flex-col items-center rounded-2xl p-4 min-h-[32rem] h-full ${getCardInnerClass(xp)}`}
       >
-        {rarityImageUrl ? (
-          <Image
-            src={rarityImageUrl}
-            alt={card.aircraftId}
-            width={500}
-            height={150}
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            Loading image...
-          </div>
-        )}
+        <Image
+          loader={(_props) => {
+            return (
+              getRarityImage(card.aircraftId, modelsFile) ??
+              "https://yq6gb3kpv5.ufs.sh/f/7HneIh2oDecx1OGWnsiCad2wefoylF3rOHvVt0EjkXTLGZgx"
+            );
+          }}
+          src={card.aircraftId}
+          alt={card.aircraftId}
+          width={500}
+          height={150}
+          style={{
+            maxWidth: "100%",
+            height: "auto",
+          }}
+        />
+
         <Image
           loader={(_props) =>
             getAircraftImage(
@@ -234,7 +223,11 @@ export function CardComponent({
           width={250}
           className="-top-16 relative"
           height={50}
-          objectFit="cover"
+          style={{
+            maxWidth: "100%",
+            height: "auto",
+            objectFit: "cover",
+          }}
         />
 
         <div className="-mt-28 relative">
@@ -298,8 +291,12 @@ export function CardComponent({
       >
         <p>{formatTier(xp).toUpperCase()}</p>
         <p>{xp} XP</p>
-        <p className="inline-flex">{Math.round(coverage)}%</p>
-        <p className="inline-flex">{Math.round(cloudiness)}%</p>
+        <p className="inline-flex gap-2 items-center justify-center">
+          <FaCloud /> {Math.round(coverage)}%
+        </p>
+        <p className="inline-flex gap-2 items-center justify-center">
+          <FaCamera /> {Math.round(cloudiness)}%
+        </p>
       </div>
     </div>
   );
