@@ -3,6 +3,7 @@ import { db } from "~/server/db";
 import { users } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
+import { env } from "~/env";
 export default async function SandboxPage() {
   async function loginAsUser(formData: FormData) {
     "use server";
@@ -22,7 +23,9 @@ export default async function SandboxPage() {
     (await cookies()).set("authToken", user.token);
     redirect("/app/deck");
   }
-
+  if (env.NODE_ENV !== "development") {
+    redirect("/");
+  }
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Developer Sandbox</h1>

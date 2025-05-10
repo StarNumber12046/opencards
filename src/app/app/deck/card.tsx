@@ -76,7 +76,6 @@ function getCardInnerClass(xp: number) {
 
 function getRarityImage(model: string, modelsFile: ModelsFile) {
   const modelRow = modelsFile.rows.find((row) => row.id === model);
-  console.log(modelsFile);
   if (!modelRow) {
     return null;
   }
@@ -113,11 +112,11 @@ function getAircraftImage(
   modelsFile: ModelsFile,
   modelsIndexFile: Assets,
 ) {
-  const modelRow = modelsFile.rows.find((row) => row.id === aircraftId);
-  if (!modelRow) {
-    return "";
-  }
   if (!modelsIndexFile.models.images[tier][aircraftId + "_lg.png"]) {
+    const modelRow = modelsFile.rows.find((row) => row.id === aircraftId);
+    if (!modelRow) {
+      return `https://cdn.skycards.oldapes.com/assets/models/images/${tier}/${aircraftId}_lg.png`;
+    }
     if (modelRow.images) {
       return `https://cdn.skycards.oldapes.com/assets/models/images/${tier}/${modelRow.images[0]}_lg.png`;
     }
@@ -171,7 +170,6 @@ export function CardComponent({
   );
 
   React.useEffect(() => {
-    console.log(aircraftDetails);
     if (inView && !aircraftDetails) {
       setAircraftDetails(
         getAircraftDetails(card.aircraftId, modelsFile) ?? null,

@@ -9,6 +9,7 @@ import type { Assets } from "./assets";
 import { getCardStats } from "~/server/queries/user";
 import { CardComponent } from "./card";
 import type { ModelsFile } from "./models";
+import { Skeleton } from "~/components/ui/skeleton";
 
 async function Deck({ userDataId }: { userDataId: string }) {
   const modelsFile = await fetch("https://api.skycards.oldapes.com/models", {
@@ -93,7 +94,15 @@ export default async function DeckPage() {
   }
   return (
     <div>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense
+        fallback={
+          <div className="text-white flex flex-wrap w-full gap-4 items-center justify-center p-6 md:p-10">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => {
+              return <Skeleton key={i} className="w-xs h-[32rem] rounded-md" />;
+            })}
+          </div>
+        }
+      >
         <Deck userDataId={user.data.id} />
       </Suspense>
     </div>
