@@ -26,9 +26,7 @@ export function LoginForm({
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    // Mock login - in real app would validate credentials
     if (email && password) {
-      // Set mock auth token
       const [user] = await db
         .select()
         .from(users)
