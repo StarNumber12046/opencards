@@ -18,6 +18,7 @@ import {
   type Capture,
   type Card,
   type UserData,
+  type Mission,
 } from "~/types/user";
 
 /**
@@ -184,6 +185,7 @@ export async function getFullUserDataById(
       });
     }
     if (row.data) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       missionsMap.get(row.mission.id).data.push(row.data);
     }
   });
@@ -197,7 +199,7 @@ export async function getFullUserDataById(
       ...item,
       type: item.type as ItemType,
     })),
-    missions: Array.from(missionsMap.values() as Mission[]),
+    missions: Array.from(missionsMap.values()) as Mission[],
     friendIds: userFriends.map((f) => f.friendId),
     unlockedModelIds: userModels.map((m) => m.modelId),
     battleDeck: userDeck.map((c) => c.cardId),
