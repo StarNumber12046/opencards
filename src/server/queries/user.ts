@@ -179,12 +179,14 @@ export async function getFullUserDataById(
     ...user,
     achievements: userAchievements,
     cards: cardsWithCaptures,
+
     items: userItems.map((item) => ({
       ...item,
       type: item.type as ItemType,
     })),
     missions: missionsWithData,
     friendIds: userFriends.map((f) => f.friendId),
+
     unlockedModelIds: userModels.map((m) => m.modelId),
     battleDeck: userDeck.map((c) => c.cardId),
     relocation: {
@@ -194,11 +196,17 @@ export async function getFullUserDataById(
     },
     unlimitedPhotosTimeLeft:
       Date.now() - user.unlimitedPhotosExpiryTime > 0
-        ? Date.now() - user.unlimitedPhotosExpiryTime
+        ? (Date.now() - user.unlimitedPhotosExpiryTime) / 1000
         : 0,
-    radarExpandTimeLeft: (user.radarExpandEndTimestamp - Date.now()) / 1000,
-    relocationTimeLeft: (user.relocationEndTimestamp - Date.now()) / 1000,
-  };
+    radarExpandTimeLeft:
+      user.radarExpandEndTimestamp - Date.now()
+        ? (Date.now() - user.radarExpandEndTimestamp) / 1000
+        : 0,
+    relocationTimeLeft:
+      user.relocationEndTimestamp - Date.now()
+        ? (Date.now() - user.relocationEndTimestamp) / 1000
+        : 0,
+  } as UserData;
 }
 
 export async function getDbUserDataById(userId: string) {

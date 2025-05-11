@@ -13,10 +13,10 @@ export function GET(req: Request) {
       numExposures: userData.numExposures,
       lastFilmHandoutTimeLeft: 1050,
       unlimitedPhotosTimeLeft:
-        (userData.unlimitedPhotosExpiryTime - Date.now()) / 1000,
+      (userData.unlimitedPhotosExpiryTime - Date.now()) > 0 ? (userData.unlimitedPhotosExpiryTime - Date.now()) / 1000 : 0,
       radarExpandTimeLeft:
-        (userData.radarExpandEndTimestamp - Date.now()) / 1000,
-      relocationTimeLeft: (userData.relocationEndTimestamp - Date.now()) / 1000,
+        (userData.radarExpandEndTimestamp - Date.now()) > 0 ? (userData.radarExpandEndTimestamp - Date.now()) / 1000 : 0,
+      relocationTimeLeft: (userData.relocationEndTimestamp - Date.now()) > 0 ? (userData.relocationEndTimestamp - Date.now()) / 1000 : 0,
     };
     console.log(response);
     return NextResponse.json(response);
