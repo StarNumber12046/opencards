@@ -57,28 +57,16 @@ export function getCardStats(captures: Capture[]) {
  * Get total XP across all user cards
  */
 export async function getTotalXp(user: { id: string }): Promise<number> {
-  const userCards = await db
-    .select({ id: cards.id })
-    .from(cards)
+  const result = await db
+    .select({
+      totalXp: captures.xp,
+    })
+    .from(captures)
+    .innerJoin(cards, eq(captures.cardId, cards.id))
     .where(eq(cards.userId, user.id))
     .execute();
 
-  if (userCards.length === 0) return 0;
-
-  // Using Promise.all to fetch captures for all cards in parallel
-  const cardsXp = await Promise.all(
-    userCards.map(async (card) => {
-      const cardCaptures = await db
-        .select({ xp: captures.xp })
-        .from(captures)
-        .where(eq(captures.cardId, card.id))
-        .execute();
-
-      return cardCaptures.reduce((total, capture) => total + capture.xp, 0);
-    }),
-  );
-
-  return cardsXp.reduce((acc, cur) => acc + cur, 0);
+  return result.reduce((acc, cur) => acc + cur.totalXp, 0);
 }
 
 /**
@@ -110,20 +98,41 @@ export async function getFullUserDataById(
 
   if (!user) return null;
 
-  // Fetch all related data in parallel
+  // Fetch all related data in parallel using joins
   const [
-    userCards,
+    userCardsWithCaptures,
     userAchievements,
     userItems,
-    userMissions,
+    missionsWithData,
     userFriends,
     userModels,
     userDeck,
   ] = await Promise.all([
-    db.select().from(cards).where(eq(cards.userId, user.id)),
+    // Get cards with their captures
+    db
+      .select({
+        card: cards,
+        capture: captures,
+      })
+      .from(cards)
+      .leftJoin(captures, eq(cards.id, captures.cardId))
+      .where(eq(cards.userId, user.id))
+      .execute(),
+
     db.select().from(achievements).where(eq(achievements.userId, userId)),
     db.select().from(items).where(eq(items.userId, userId)),
-    db.select().from(missions).where(eq(missions.userId, userId)),
+
+    // Get missions with their data
+    db
+      .select({
+        mission: missions,
+        data: missionData,
+      })
+      .from(missions)
+      .leftJoin(missionData, eq(missions.id, missionData.missionId))
+      .where(eq(missions.userId, userId))
+      .execute(),
+
     db
       .select({ friendId: friends.friendId })
       .from(friends)
@@ -138,55 +147,58 @@ export async function getFullUserDataById(
       .where(eq(battleDeck.userId, userId)),
   ]);
 
-  // Process cards and captures data
-  const cardsWithCaptures: Card[] = await Promise.all(
-    userCards.map(async (card) => {
-      const cardCaptures = await db
-        .select()
-        .from(captures)
-        .where(eq(captures.cardId, card.id));
+  // Process cards and captures
+  const cardsMap = new Map<string, Card>();
+  userCardsWithCaptures.forEach((row) => {
+    if (!cardsMap.has(row.card.id)) {
+      cardsMap.set(row.card.id, {
+        ...row.card,
+        captures: [],
+        tier: Tier.Paper,
+        cloudiness: 0,
+        coverage: 0,
+        glow: false,
+        xp: 0,
+        aircraftId: row.card.aircraftId,
+      });
+    }
+    if (row.capture) {
+      const card = cardsMap.get(row.card.id)!;
+      card.captures.push(row.capture);
+      const stats = getCardStats(card.captures);
+      card.tier = getTier(card.captures);
+      card.cloudiness = stats.cloudiness;
+      card.coverage = stats.coverage;
+      card.glow = stats.glow;
+      card.xp = stats.xp;
+    }
+  });
 
-      // Calculate all stats at once
-      const stats = getCardStats(cardCaptures);
-
-      return {
-        ...card,
-        captures: cardCaptures,
-        tier: getTier(cardCaptures),
-        cloudiness: stats.cloudiness,
-        coverage: stats.coverage,
-        glow: stats.glow,
-        xp: stats.xp,
-        aircraftId: card.aircraftId,
-      } as Card;
-    }),
-  );
-
-  // Process mission data
-  const missionsWithData = await Promise.all(
-    userMissions.map(async (mission) => {
-      const data = await db
-        .select()
-        .from(missionData)
-        .where(eq(missionData.missionId, mission.id));
-
-      return { ...mission, data };
-    }),
-  );
+  // Process missions
+  const missionsMap = new Map();
+  missionsWithData.forEach((row) => {
+    if (!missionsMap.has(row.mission.id)) {
+      missionsMap.set(row.mission.id, {
+        ...row.mission,
+        data: [],
+      });
+    }
+    if (row.data) {
+      missionsMap.get(row.mission.id).data.push(row.data);
+    }
+  });
 
   // Assemble and return complete user data
   return {
     ...user,
     achievements: userAchievements,
-    cards: cardsWithCaptures,
-
+    cards: Array.from(cardsMap.values()),
     items: userItems.map((item) => ({
       ...item,
       type: item.type as ItemType,
     })),
-    missions: missionsWithData,
+    missions: Array.from(missionsMap.values() as Mission[]),
     friendIds: userFriends.map((f) => f.friendId),
-
     unlockedModelIds: userModels.map((m) => m.modelId),
     battleDeck: userDeck.map((c) => c.cardId),
     relocation: {
