@@ -195,16 +195,16 @@ export async function getFullUserDataById(
       timestamp: user.relocationTimestamp,
     },
     unlimitedPhotosTimeLeft:
-      Date.now() - user.unlimitedPhotosExpiryTime > 0
-        ? (Date.now() - user.unlimitedPhotosExpiryTime) / 1000
+      user.unlimitedPhotosExpiryTime - Date.now() > 0
+        ? (user.unlimitedPhotosExpiryTime - Date.now()) / 1000
         : 0,
     radarExpandTimeLeft:
-      user.radarExpandEndTimestamp - Date.now()
-        ? (Date.now() - user.radarExpandEndTimestamp) / 1000
+      user.radarExpandEndTimestamp - Date.now() > 0
+        ? (user.radarExpandEndTimestamp - Date.now()) / 1000
         : 0,
     relocationTimeLeft:
-      user.relocationEndTimestamp - Date.now()
-        ? (Date.now() - user.relocationEndTimestamp) / 1000
+      user.relocationEndTimestamp - Date.now() > 0
+        ? (user.relocationEndTimestamp - Date.now()) / 1000
         : 0,
   } as UserData;
 }
