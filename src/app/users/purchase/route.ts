@@ -99,15 +99,24 @@ export function POST(req: Request) {
           relocationEndTimestamp: userData.relocationEndTimestamp,
         })
         .execute();
+      console.log(response);
       return NextResponse.json({
-        coins: response?.coins ?? "",
-        photosUnlimited: purchasePackage.photos,
+        coins: response?.coins ?? 0,
+        photosUnlimited:
+          (response?.unlimitedPhotosExpiryTime ?? 0) > Date.now(),
         lastFilmHandoutTimeLeft: 1050,
-        unlimitedPhotosTimeLeft: purchasePackage.unlimitedTimeLeft,
+        unlimitedPhotosTimeLeft:
+          (response?.unlimitedPhotosExpiryTime ?? 0) - Date.now() > 0
+            ? ((response?.unlimitedPhotosExpiryTime ?? 0) - Date.now()) / 1000
+            : 0,
         radarExpandTimeLeft:
-          (response?.radarExpandTimeLeft ?? 0 - Date.now()) / 1000,
+          (response?.radarExpandTimeLeft ?? 0 - Date.now()) > 0
+            ? (response?.radarExpandTimeLeft ?? 0 - Date.now()) / 1000
+            : 0,
         relocationTimeLeft:
-          ((response?.relocationEndTimestamp ?? 0) - Date.now()) / 1000,
+          (response?.relocationEndTimestamp ?? 0) - Date.now() > 0
+            ? ((response?.relocationEndTimestamp ?? 0) - Date.now()) / 1000
+            : 0,
       });
     }
   });
